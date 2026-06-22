@@ -1,0 +1,31 @@
+server:
+  port: 8080
+  error:
+    include-stacktrace: never
+    include-message: never
+    include-binding-errors: never
+spring:
+  application:
+    name: avisaas-api
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/avisaas
+    username: avisaas_user
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+    show-sql: true
+
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+app:
+  jwt:
+    secret: ${JWT_SECRET}
+    expiration: 86400000
