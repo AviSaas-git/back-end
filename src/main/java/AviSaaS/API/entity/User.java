@@ -32,6 +32,8 @@ public class User implements UserDetails {
     @JoinColumn(name = "tenant_id", nullable = false)
     private Tenant tenant;
 
+
+
     @Column(nullable = false)
     private String nom;
 

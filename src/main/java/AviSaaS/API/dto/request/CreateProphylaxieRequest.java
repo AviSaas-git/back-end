@@ -16,6 +16,7 @@ public class CreateProphylaxieRequest {
 
     private String laboratoire;
 
+    private Double montant; // coût du traitement en FCFA, optionnel
     @NotBlank(message = "Le dosage est obligatoire")
     private String dosage;
 

@@ -1,0 +1,86 @@
+/*package AviSaaS.API.service;
+
+
+import AviSaaS.API.dto.request.CreateConsommationRequest;
+import AviSaaS.API.dto.response.ConsommationResponse;
+import AviSaaS.API.entity.*;
+import AviSaaS.API.repository.*;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.UUID;
+
+@Service
+@RequiredArgsConstructor
+public class ConsommationServicedelete {
+
+    private final ConsommationAlimentRepository consommationRepository;
+    private final BandeRepository              bandeRepository;
+    private final AnimalRepository             animalRepository;
+
+    // ── PAR BANDE ────────────────────────────────────────────────────
+    @Transactional
+    public ConsommationResponse ajouterParBande(UUID bandeId, UUID tenantId,
+                                                CreateConsommationRequest req) {
+        Bande bande = bandeRepository.findByIdAndTenantId(bandeId, tenantId)
+                .orElseThrow(() -> new RuntimeException("Bande introuvable"));
+
+        ConsommationAliment c = ConsommationAliment.builder()
+                .bande(bande)
+                .date(req.getDate())
+                .typeAliment(req.getTypeAliment())
+                .quantiteKg(req.getQuantiteKg())
+                .prixParKgFcfa(req.getPrixParKgFcfa())
+                .observations(req.getObservations())
+                .build();
+
+        return toResponse(consommationRepository.save(c));
+    }
+
+    public List<ConsommationResponse> listerParBande(UUID bandeId, UUID tenantId) {
+        bandeRepository.findByIdAndTenantId(bandeId, tenantId)
+                .orElseThrow(() -> new RuntimeException("Bande introuvable"));
+        return consommationRepository.findByBandeIdOrderByDateDesc(bandeId)
+                .stream().map(this::toResponse).toList();
+    }
+
+    // ── PAR ANIMAL ───────────────────────────────────────────────────
+    @Transactional
+    public ConsommationResponse ajouterParAnimal(UUID animalId, UUID tenantId,
+                                                 CreateConsommationRequest req) {
+        Animal animal = animalRepository.findByIdAndTenantId(animalId, tenantId)
+                .orElseThrow(() -> new RuntimeException("Animal introuvable"));
+
+        ConsommationAliment c = ConsommationAliment.builder()
+                .animal(animal)
+                .date(req.getDate())
+                .typeAliment(req.getTypeAliment())
+                .quantiteKg(req.getQuantiteKg())
+                .prixParKgFcfa(req.getPrixParKgFcfa())
+                .observations(req.getObservations())
+                .build();
+
+        return toResponse(consommationRepository.save(c));
+    }
+
+    public List<ConsommationResponse> listerParAnimal(UUID animalId, UUID tenantId) {
+        animalRepository.findByIdAndTenantId(animalId, tenantId)
+                .orElseThrow(() -> new RuntimeException("Animal introuvable"));
+        return consommationRepository.findByAnimalIdOrderByDateDesc(animalId)
+                .stream().map(this::toResponse).toList();
+    }
+
+    private ConsommationResponse toResponse(ConsommationAliment c) {
+        return ConsommationResponse.builder()
+                .id(c.getId())
+                .date(c.getDate())
+                .typeAliment(c.getTypeAliment())
+                .quantiteKg(c.getQuantiteKg())
+                .prixParKgFcfa(c.getPrixParKgFcfa())
+                .montantFcfa(c.getMontantFcfa())
+                .observations(c.getObservations())
+                .build();
+    }
+}*/

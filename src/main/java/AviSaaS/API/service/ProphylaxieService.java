@@ -4,6 +4,7 @@ package AviSaaS.API.service;
 import AviSaaS.API.dto.request.CreateProphylaxieRequest;
 import AviSaaS.API.dto.response.ProphylaxieResponse;
 import AviSaaS.API.entity.Bande;
+import AviSaaS.API.entity.DepenseBande;
 import AviSaaS.API.entity.SuiviProphylaxie;
 import AviSaaS.API.repository.BandeRepository;
 import AviSaaS.API.repository.SuiviProphylaxieRepository;
@@ -46,6 +47,9 @@ public class ProphylaxieService {
                 .build();
 
         prophylaxieRepository.save(fiche);
+
+
+
         return toResponse(fiche);
     }
 
