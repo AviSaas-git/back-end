@@ -39,4 +39,13 @@ public class MortaliteController {
     private UUID tenantId(HttpServletRequest req) {
         return jwtService.extractTenantId(req.getHeader("Authorization").substring(7));
     }
+
+    @DeleteMapping("/{mortaliteId}")
+    public ResponseEntity<Void> supprimer(
+            @PathVariable UUID bandeId,
+            @PathVariable UUID mortaliteId,
+            HttpServletRequest request) {
+        mortaliteService.supprimer(mortaliteId, tenantId(request));
+        return ResponseEntity.noContent().build();
+    }
 }

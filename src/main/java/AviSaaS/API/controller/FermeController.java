@@ -3,6 +3,7 @@ package AviSaaS.API.controller;
 
 
 import AviSaaS.API.dto.request.CreateFermeRequest;
+import AviSaaS.API.dto.request.UpdateFermeRequest;
 import AviSaaS.API.dto.response.BandeResponse;
 import AviSaaS.API.dto.response.FermeResponse;
 import AviSaaS.API.security.JwtService;
@@ -12,13 +13,13 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import java.util.UUID;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/fermes")
 @RequiredArgsConstructor
-public class FermeController {
+public class FermeController extends BaseController {
 
     private final FermeService fermeService;
     private final JwtService   jwtService;
@@ -52,8 +53,27 @@ public class FermeController {
         return header.substring(7); // retire "Bearer "
     }
 
-    private java.util.UUID extractTenantId(HttpServletRequest req) {
-        String token = req.getHeader("Authorization").substring(7);
-        return jwtService.extractTenantId(token);
+// modifier
+    @PatchMapping("/{id}")
+    public ResponseEntity<FermeResponse> modifier(
+            @PathVariable UUID id,
+            @RequestBody UpdateFermeRequest req,
+            HttpServletRequest request) {
+
+        UUID tenantId = extractTenantId(request);
+
+        return ResponseEntity.ok(
+                fermeService.modifier(id, tenantId, req)
+        );
+    }
+
+    //delete
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> supprimer(
+            @PathVariable UUID id,
+            HttpServletRequest request) {
+
+        fermeService.supprimer(id, extractTenantId(request));
+        return ResponseEntity.noContent().build();
     }
 }

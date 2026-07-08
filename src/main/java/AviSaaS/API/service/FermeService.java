@@ -1,7 +1,8 @@
 package AviSaaS.API.service;
 
-
+import AviSaaS.API.repository.BatimentRepository;
 import AviSaaS.API.dto.request.CreateFermeRequest;
+import AviSaaS.API.dto.request.UpdateFermeRequest;
 import AviSaaS.API.dto.response.BandeResponse;
 import AviSaaS.API.dto.response.FermeResponse;
 import AviSaaS.API.entity.Ferme;
@@ -21,7 +22,7 @@ public class FermeService {
 
     private final FermeRepository  fermeRepository;
     private final TenantRepository tenantRepository;
-
+    private final BatimentRepository batimentRepository;
     @Transactional
     public FermeResponse creer(CreateFermeRequest req, UUID tenantId) {
 
@@ -57,5 +58,32 @@ public class FermeService {
                 .capaciteMax(f.getCapaciteMax())
                 .tenantId(f.getTenant().getId())
                 .build();
+    }
+
+    @Transactional
+    public FermeResponse modifier(UUID id, UUID tenantId, UpdateFermeRequest req) {
+        Ferme ferme = fermeRepository.findByIdAndTenantId(id, tenantId)
+                .orElseThrow(() -> new RuntimeException("Ferme introuvable"));
+
+        if (req.getNom()         != null) ferme.setNom(req.getNom());
+        if (req.getLocalisation()!= null) ferme.setLocalisation(req.getLocalisation());
+        if (req.getSurfaceM2()   != null) ferme.setSurfaceM2(req.getSurfaceM2());
+        if (req.getCapaciteMax() != null) ferme.setCapaciteMax(req.getCapaciteMax());
+
+        return toResponse(fermeRepository.save(ferme));
+    }
+
+    @Transactional
+    public void supprimer(UUID id, UUID tenantId) {
+        Ferme ferme = fermeRepository.findByIdAndTenantId(id, tenantId)
+                .orElseThrow(() -> new RuntimeException("Ferme introuvable"));
+
+        // Vérifie qu'il n'y a pas de bâtiments liés
+        if (!batimentRepository.findByFermeId(id).isEmpty()) {
+            throw new RuntimeException(
+                    "Impossible de supprimer — cette ferme contient des bâtiments. " +
+                            "Supprimez les bâtiments d'abord.");
+        }
+        fermeRepository.delete(ferme);
     }
 }

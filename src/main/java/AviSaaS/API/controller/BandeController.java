@@ -1,8 +1,10 @@
 package AviSaaS.API.controller;
 
 import AviSaaS.API.dto.request.CreateBandeRequest;
+import AviSaaS.API.dto.request.UpdateBandeRequest;
 import AviSaaS.API.dto.response.BandeResponse;
 import AviSaaS.API.entity.User; // 👈 Assure-toi d'importer ton entité User ou UserDetails
+import AviSaaS.API.security.JwtService;
 import AviSaaS.API.service.BandeService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -17,10 +19,10 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/bandes")
 @RequiredArgsConstructor
-public class BandeController {
+public class BandeController extends BaseController {
 
     private final BandeService bandeService;
-
+    private final JwtService jwtService;
     @PostMapping
     public ResponseEntity<BandeResponse> creer(
             @Valid @RequestBody CreateBandeRequest req,
@@ -51,4 +53,24 @@ public class BandeController {
 
         return ResponseEntity.ok(bandeService.getDetail(id, tenantId));
     }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<BandeResponse> modifier(
+            @PathVariable UUID id,
+            @RequestBody UpdateBandeRequest req,
+            HttpServletRequest request) {
+        return ResponseEntity.ok(
+                bandeService.modifier(id, extractTenantId(request), req));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> supprimer(
+            @PathVariable UUID id, HttpServletRequest request) {
+        bandeService.supprimer(id, extractTenantId(request));
+        return ResponseEntity.noContent().build();
+    }
+
+
+
+
 }

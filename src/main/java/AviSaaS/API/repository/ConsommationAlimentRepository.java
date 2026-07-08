@@ -13,12 +13,11 @@ public interface ConsommationAlimentRepository
         extends JpaRepository<ConsommationAliment, UUID> {
 
     List<ConsommationAliment> findByBandeIdOrderByDateDesc(UUID bandeId);
+    List<ConsommationAliment> findByAnimalIdOrderByDateDesc(UUID animalId);
 
-    @Query("SELECT SUM(c.coutTotal) FROM ConsommationAliment c " +
-            "WHERE c.bande.id = :bandeId")
+    @Query("SELECT SUM(c.coutTotal) FROM ConsommationAliment c WHERE c.bande.id = :bandeId")
     Double coutTotalParBande(UUID bandeId);
 
-    @Query("SELECT SUM(c.quantiteKg) FROM ConsommationAliment c " +
-            "WHERE c.bande.id = :bandeId")
-    Double quantiteTotaleParBande(UUID bandeId);
+    @Query("SELECT SUM(c.coutTotal) FROM ConsommationAliment c WHERE c.animal.id = :animalId")
+    Double coutTotalParAnimal(UUID animalId);
 }

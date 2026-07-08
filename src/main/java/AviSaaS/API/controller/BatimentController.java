@@ -1,6 +1,7 @@
 package AviSaaS.API.controller;
 
 import AviSaaS.API.dto.request.CreateBatimentRequest;
+import AviSaaS.API.dto.request.UpdateBatimentRequest;
 import AviSaaS.API.dto.response.BatimentResponse;
 import AviSaaS.API.security.JwtService;
 import AviSaaS.API.service.BatimentService;
@@ -9,13 +10,13 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import java.util.UUID;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/batiments")
 @RequiredArgsConstructor
-public class BatimentController {
+public class BatimentController extends BaseController {
 
     private final BatimentService batimentService;
     private final JwtService      jwtService;
@@ -48,9 +49,37 @@ public class BatimentController {
         var tenantId = jwtService.extractTenantId(token);
 
         return ResponseEntity.ok(
-                batimentService.listerParTenant(tenantId)
+                batimentService.lister(tenantId)
         );
     }
 
+    //modifier
+    @PatchMapping("/{id}")
+    public ResponseEntity<BatimentResponse> modifier(
+            @PathVariable UUID id,
+            @RequestBody UpdateBatimentRequest req,
+            HttpServletRequest request) {
+
+        return ResponseEntity.ok(
+                batimentService.modifier(
+                        id,
+                        extractTenantId(request),
+                        req
+                )
+        );
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> supprimer(
+            @PathVariable UUID id,
+            HttpServletRequest request) {
+
+        batimentService.supprimer(
+                id,
+                extractTenantId(request)
+        );
+
+        return ResponseEntity.noContent().build();
+    }
 
 }

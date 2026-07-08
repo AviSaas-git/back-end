@@ -1,6 +1,7 @@
 package AviSaaS.API.controller;
 
 import AviSaaS.API.dto.request.CreateAnimalRequest;
+import AviSaaS.API.dto.request.UpdateAnimalRequest;
 import AviSaaS.API.dto.request.UpdateSexeRequest;
 import AviSaaS.API.dto.response.AnimalResponse;
 import AviSaaS.API.security.JwtService;
@@ -53,13 +54,29 @@ public class AnimalController {
         return ResponseEntity.ok(
                 animalService.getById(id, extractTenantId(request)));
     }
-
+/*
     @PatchMapping("/{id}/sexe")
     public ResponseEntity<AnimalResponse> updateSexe(
             @PathVariable UUID id, @Valid @RequestBody UpdateSexeRequest req,
             HttpServletRequest request) {
         return ResponseEntity.ok(
                 animalService.mettreAJourSexe(id, extractTenantId(request), req.getSexe()));
+    }
+*/
+    @PatchMapping("/{id}")
+    public ResponseEntity<AnimalResponse> modifier(
+            @PathVariable UUID id,
+            @RequestBody UpdateAnimalRequest req,
+            HttpServletRequest request) {
+        return ResponseEntity.ok(
+                animalService.modifier(id, extractTenantId(request), req));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> supprimer(
+            @PathVariable UUID id, HttpServletRequest request) {
+        animalService.supprimer(id, extractTenantId(request));
+        return ResponseEntity.noContent().build();
     }
 
     private java.util.UUID extractTenantId(HttpServletRequest req) {

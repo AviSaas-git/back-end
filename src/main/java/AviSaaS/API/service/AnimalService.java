@@ -1,6 +1,7 @@
 package AviSaaS.API.service;
 
 import AviSaaS.API.dto.request.CreateAnimalRequest;
+import AviSaaS.API.dto.request.UpdateAnimalRequest;
 import AviSaaS.API.dto.response.AnimalResponse;
 import AviSaaS.API.entity.*;
 import AviSaaS.API.repository.*;
@@ -118,6 +119,44 @@ public class AnimalService {
         animal.setSexe(Animal.SexeEnum.valueOf(sexe));
         animalRepository.save(animal);
         return toResponse(animal);
+    }
+// a verifiers si gerer sur le front supprimer mettrejoursexe
+    @Transactional
+    public AnimalResponse modifier(UUID id, UUID tenantId, UpdateAnimalRequest req) {
+        Animal animal = animalRepository.findByIdAndTenantId(id, tenantId)
+                .orElseThrow(() -> new RuntimeException("Animal introuvable"));
+
+        if (req.getNom()           != null) animal.setNom(req.getNom());
+        if (req.getPoidsActuelKg() != null) animal.setPoidsActuelKg(req.getPoidsActuelKg());
+        if (req.getDateNaissance() != null) animal.setDateNaissance(req.getDateNaissance());
+
+        if (req.getSexe() != null) {
+            try { animal.setSexe(Animal.SexeEnum.valueOf(req.getSexe())); }
+            catch (IllegalArgumentException e) {
+                throw new RuntimeException("Sexe invalide : " + req.getSexe());
+            }
+        }
+        if (req.getStatut() != null) {
+            try { animal.setStatut(Animal.StatutAnimal.valueOf(req.getStatut())); }
+            catch (IllegalArgumentException e) {
+                throw new RuntimeException("Statut invalide : " + req.getStatut());
+            }
+        }
+        if (req.getBatimentId() != null) {
+            Batiment bat = batimentRepository
+                    .findByIdAndFermeTenantId(req.getBatimentId(), tenantId)
+                    .orElseThrow(() -> new RuntimeException("Bâtiment introuvable"));
+            animal.setBatiment(bat);
+        }
+
+        return toResponse(animalRepository.save(animal));
+    }
+
+    @Transactional
+    public void supprimer(UUID id, UUID tenantId) {
+        Animal animal = animalRepository.findByIdAndTenantId(id, tenantId)
+                .orElseThrow(() -> new RuntimeException("Animal introuvable"));
+        animalRepository.delete(animal);
     }
 
     public AnimalResponse getById(UUID id, UUID tenantId) {

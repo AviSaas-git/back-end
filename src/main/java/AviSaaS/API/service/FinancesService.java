@@ -106,4 +106,29 @@ public class FinancesService {
     }
 
     private double nvl(Double v) { return v != null ? v : 0.0; }
+
+
+    @Transactional
+    public DepenseResponse modifier(UUID id, UUID tenantId, CreateDepenseRequest req) {
+        DepenseBande dep = depenseRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Dépense introuvable"));
+        if (!dep.getBande().getTenant().getId().equals(tenantId))
+            throw new RuntimeException("Accès non autorisé");
+
+        if (req.getDate()          != null) dep.setDate(req.getDate());
+        if (req.getMontant()       > 0)     dep.setMontant(req.getMontant());
+        if (req.getSousCategorie() != null) dep.setSousCategorie(req.getSousCategorie());
+        if (req.getDescription()   != null) dep.setDescription(req.getDescription());
+
+        return toResponse(depenseRepository.save(dep));
+    }
+
+    @Transactional
+    public void supprimer(UUID id, UUID tenantId) {
+        DepenseBande dep = depenseRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Dépense introuvable"));
+        if (!dep.getBande().getTenant().getId().equals(tenantId))
+            throw new RuntimeException("Accès non autorisé");
+        depenseRepository.delete(dep);
+    }
 }

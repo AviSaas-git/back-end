@@ -1,6 +1,7 @@
 package AviSaaS.API.service;
 
 import AviSaaS.API.dto.request.CreateBandeRequest;
+import AviSaaS.API.dto.request.UpdateBandeRequest;
 import AviSaaS.API.dto.response.BandeResponse;
 import AviSaaS.API.entity.*;
 import AviSaaS.API.exception.BusinessException;
@@ -186,5 +187,40 @@ public class BandeService {
         Bande bande = bandeRepository.findByIdAndTenantId(id, tenantId)
                 .orElseThrow(() -> new RuntimeException("Bande introuvable"));
         return toResponse(bande);
+    }
+
+    @Transactional
+    public BandeResponse modifier(UUID id, UUID tenantId, UpdateBandeRequest req) {
+        Bande bande = bandeRepository.findByIdAndTenantId(id, tenantId)
+                .orElseThrow(() -> new RuntimeException("Bande introuvable"));
+
+        if (req.getRace()       != null) bande.setRace(req.getRace());
+        if (req.getFournisseur()!= null) bande.setFournisseur(req.getFournisseur());
+        if (req.getStatut()     != null) {
+            try {
+                bande.setStatut(Bande.StatutBande.valueOf(req.getStatut()));
+            } catch (IllegalArgumentException e) {
+                throw new RuntimeException("Statut invalide : " + req.getStatut());
+            }
+        }
+        if (req.getBatimentId() != null) {
+            Batiment bat = batimentRepository
+                    .findByIdAndFermeTenantId(req.getBatimentId(), tenantId)
+                    .orElseThrow(() -> new RuntimeException("Bâtiment introuvable"));
+            bande.setBatiment(bat);
+        }
+
+        return toResponse(bandeRepository.save(bande));
+    }
+
+    @Transactional
+    public void supprimer(UUID id, UUID tenantId) {
+        Bande bande = bandeRepository.findByIdAndTenantId(id, tenantId)
+                .orElseThrow(() -> new RuntimeException("Bande introuvable"));
+        if (bande.getStatut() == Bande.StatutBande.ACTIVE) {
+            throw new RuntimeException(
+                    "Impossible de supprimer une bande active. Clôturez-la d'abord.");
+        }
+        bandeRepository.delete(bande);
     }
 }

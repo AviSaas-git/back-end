@@ -9,8 +9,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "consommations_aliment",
-        indexes = @Index(name = "idx_conso_bande", columnList = "bande_id"))
+@Table(name = "consommations_aliment")
 @Data @Builder @NoArgsConstructor @AllArgsConstructor
 public class ConsommationAliment {
 
@@ -18,9 +17,14 @@ public class ConsommationAliment {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    // L'un OU l'autre est rempli, jamais les deux
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "bande_id", nullable = false)
+    @JoinColumn(name = "bande_id")
     private Bande bande;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "animal_id")
+    private Animal animal;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "formule_id", nullable = false)

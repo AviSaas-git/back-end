@@ -12,16 +12,68 @@ import java.util.UUID;
 @Repository
 public interface BandeRepository extends JpaRepository<Bande, UUID> {
 
+    // ==========================
+    // Recherche
+    // ==========================
+
+    List<Bande> findByTenantId(UUID tenantId);
+
     List<Bande> findByTenantIdOrderByCreatedAtDesc(UUID tenantId);
+
     Optional<Bande> findByIdAndTenantId(UUID id, UUID tenantId);
-    long countByTenantIdAndStatut(UUID tenantId, Bande.StatutBande statut);
-    long countByTenantIdAndDateArriveeBetween(UUID tenantId, LocalDate start, LocalDate end);
+
+    List<Bande> findByBatimentId(UUID batimentId);
+
+    List<Bande> findByBatimentIdAndTenantId(UUID batimentId, UUID tenantId);
+
+    List<Bande> findByStatut(Bande.StatutBande statut);
+
+    List<Bande> findByTenantIdAndStatut(
+            UUID tenantId,
+            Bande.StatutBande statut
+    );
+
+    // ==========================
+    // Comptages
+    // ==========================
+
     long countByTenantId(UUID tenantId);
 
-  //  boolean existsByBatimentIdAndStatut(UUID id, Bande.StatutBande statutBande);
+    long countByTenantIdAndStatut(
+            UUID tenantId,
+            Bande.StatutBande statut
+    );
+
+    long countByBatimentIdAndStatut(
+            UUID batimentId,
+            Bande.StatutBande statut
+    );
+
+    long countByBatimentIdAndTenantIdAndStatut(
+            UUID batimentId,
+            UUID tenantId,
+            Bande.StatutBande statut
+    );
+
+    // ✅ AJOUTER CETTE METHODE
+    long countByTenantIdAndDateArriveeBetween(
+            UUID tenantId,
+            LocalDate debut,
+            LocalDate fin
+    );
+
+    // ==========================
+    // Existence
+    // ==========================
 
     boolean existsByBatimentIdAndStatut(
             UUID batimentId,
+            Bande.StatutBande statut
+    );
+
+    boolean existsByBatimentIdAndTenantIdAndStatut(
+            UUID batimentId,
+            UUID tenantId,
             Bande.StatutBande statut
     );
 }

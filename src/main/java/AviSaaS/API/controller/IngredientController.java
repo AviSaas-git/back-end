@@ -3,6 +3,7 @@ package AviSaaS.API.controller;
 
 import AviSaaS.API.dto.request.AchatIngredientRequest;
 import AviSaaS.API.dto.request.CreateIngredientRequest;
+import AviSaaS.API.dto.request.UpdateIngredientRequest;
 import AviSaaS.API.dto.response.IngredientResponse;
 import AviSaaS.API.security.JwtService;
 import AviSaaS.API.service.AlimentationService;
@@ -47,5 +48,21 @@ public class IngredientController {
 
     private UUID tenantId(HttpServletRequest req) {
         return jwtService.extractTenantId(req.getHeader("Authorization").substring(7));
+    }
+//
+    @PatchMapping("/{id}")
+    public ResponseEntity<IngredientResponse> modifier(
+            @PathVariable UUID id,
+            @RequestBody UpdateIngredientRequest req,
+            HttpServletRequest request) {
+        return ResponseEntity.ok(
+                alimentationService.modifierIngredient(id, tenantId(request), req));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> supprimer(
+            @PathVariable UUID id, HttpServletRequest request) {
+        alimentationService.supprimerIngredient(id, tenantId(request));
+        return ResponseEntity.noContent().build();
     }
 }

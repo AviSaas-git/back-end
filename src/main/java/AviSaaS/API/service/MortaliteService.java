@@ -61,4 +61,22 @@ public class MortaliteService {
                 .nombreMorts(m.getNombreMorts()).cause(m.getCause())
                 .build();
     }
+
+    @Transactional
+    public void supprimer(UUID id, UUID tenantId) {
+        SuiviMortalite mort = mortaliteRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Entrée introuvable"));
+
+        // Vérifie que la bande appartient bien au tenant
+        if (!mort.getBande().getTenant().getId().equals(tenantId)) {
+            throw new RuntimeException("Accès non autorisé");
+        }
+
+        // Remettre l'effectif à jour
+        Bande bande = mort.getBande();
+        bande.setEffectifActuel(bande.getEffectifActuel() + mort.getNombreMorts());
+        bandeRepository.save(bande);
+
+        mortaliteRepository.delete(mort);
+    }
 }

@@ -42,4 +42,23 @@ public class FinancesController {
     private UUID tenantId(HttpServletRequest req) {
         return jwtService.extractTenantId(req.getHeader("Authorization").substring(7));
     }
+
+    @PatchMapping("/depenses/{depenseId}")
+    public ResponseEntity<DepenseResponse> modifier(
+            @PathVariable UUID bandeId,
+            @PathVariable UUID depenseId,
+            @RequestBody CreateDepenseRequest req,
+            HttpServletRequest request) {
+        return ResponseEntity.ok(
+                financesService.modifier(depenseId, tenantId(request), req));
+    }
+
+    @DeleteMapping("/depenses/{depenseId}")
+    public ResponseEntity<Void> supprimer(
+            @PathVariable UUID bandeId,
+            @PathVariable UUID depenseId,
+            HttpServletRequest request) {
+        financesService.supprimer(depenseId, tenantId(request));
+        return ResponseEntity.noContent().build();
+    }
 }

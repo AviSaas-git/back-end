@@ -25,7 +25,8 @@ public class AlimentationService {
     private final EspeceReferenceRepository especeRepository;
     private final DepenseBandeRepository depenseRepository;
     // ─── INGRÉDIENTS ─────────────────────────────────────────────────
-
+// Ajoute AnimalRepository dans le constructeur (@RequiredArgsConstructor le fait automatiquement)
+    private final AnimalRepository animalRepository;
     @Transactional
     public IngredientResponse creerIngredient(CreateIngredientRequest req, UUID tenantId) {
         Tenant tenant = tenantRepository.findById(tenantId)
@@ -248,5 +249,97 @@ public class AlimentationService {
                 .coutTotal(c.getCoutTotal())
                 .observations(c.getObservations())
                 .build();
+    }
+
+
+
+    @Transactional
+    public ConsommationResponse enregistrerConsommationAnimal(UUID animalId, UUID tenantId,
+                                                              CreateConsommationRequest req) {
+        Animal animal = animalRepository.findByIdAndTenantId(animalId, tenantId)
+                .orElseThrow(() -> new RuntimeException("Animal introuvable"));
+
+        FormulaAliment formule = formulaRepository
+                .findByIdAndTenantId(req.getFormulaId(), tenantId)
+                .orElseThrow(() -> new RuntimeException("Formule introuvable"));
+
+        double prixMoment = formule.getPrixRevientKg();
+        double coutTotal  = req.getQuantiteKg() * prixMoment;
+
+        ConsommationAliment conso = ConsommationAliment.builder()
+                .animal(animal)
+                .formule(formule)
+                .date(req.getDate())
+                .quantiteKg(req.getQuantiteKg())
+                .prixRevientKgMoment(prixMoment)
+                .coutTotal(coutTotal)
+                .observations(req.getObservations())
+                .build();
+
+        conso = consommationRepository.save(conso);
+        return toConsommationResponse(conso);
+    }
+
+    public AlimentationBandeResponse getAlimentationAnimal(UUID animalId, UUID tenantId) {
+        animalRepository.findByIdAndTenantId(animalId, tenantId)
+                .orElseThrow(() -> new RuntimeException("Animal introuvable"));
+
+        List<ConsommationAliment> consos =
+                consommationRepository.findByAnimalIdOrderByDateDesc(animalId);
+
+        double totalKg   = consos.stream().mapToDouble(ConsommationAliment::getQuantiteKg).sum();
+        double totalCout = consos.stream().mapToDouble(ConsommationAliment::getCoutTotal).sum();
+
+        Map<String, Double> coutParFormule = consos.stream()
+                .collect(Collectors.groupingBy(
+                        c -> c.getFormule().getNom(),
+                        Collectors.summingDouble(ConsommationAliment::getCoutTotal)));
+
+        return AlimentationBandeResponse.builder()
+                .totalKgConsommes(totalKg)
+                .coutTotalAlimentation(totalCout)
+                .coutParKgVifMoyen(0)
+                .consommationParOiseauKg(totalKg) // ici = total animal (1 seul sujet)
+                .coutParFormule(coutParFormule)
+                .historique(consos.stream().map(this::toConsommationResponse).toList())
+                .build();
+    }
+
+    //
+
+    @Transactional
+    public IngredientResponse modifierIngredient(UUID id, UUID tenantId,
+                                                 UpdateIngredientRequest req) {
+        Ingredient ing = ingredientRepository.findByIdAndTenantId(id, tenantId)
+                .orElseThrow(() -> new RuntimeException("Ingrédient introuvable"));
+
+        if (req.getNom()            != null) ing.setNom(req.getNom());
+        if (req.getUnite()          != null) ing.setUnite(req.getUnite());
+        if (req.getPrixUnitaireKg() != null) ing.setPrixUnitaireKg(req.getPrixUnitaireKg());
+        if (req.getFournisseur()    != null) ing.setFournisseur(req.getFournisseur());
+        if (req.getDescription()    != null) ing.setDescription(req.getDescription());
+        if (req.getActif()          != null) ing.setActif(req.getActif());
+
+        return toIngredientResponse(ingredientRepository.save(ing));
+    }
+
+    @Transactional
+    public void supprimerIngredient(UUID id, UUID tenantId) {
+        Ingredient ing = ingredientRepository.findByIdAndTenantId(id, tenantId)
+                .orElseThrow(() -> new RuntimeException("Ingrédient introuvable"));
+        // Soft delete — on désactive au lieu de supprimer
+        // pour préserver l'historique des consommations
+        ing.setActif(false);
+        ingredientRepository.save(ing);
+    }
+
+
+    @Transactional
+    public void supprimerFormule(UUID id, UUID tenantId) {
+        FormulaAliment formule = formulaRepository.findByIdAndTenantId(id, tenantId)
+                .orElseThrow(() -> new RuntimeException("Formule introuvable"));
+        // Soft delete — préserve l'historique des consommations
+        formule.setActif(false);
+        formulaRepository.save(formule);
     }
 }

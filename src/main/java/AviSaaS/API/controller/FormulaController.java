@@ -37,4 +37,11 @@ public class FormulaController {
     private UUID tenantId(HttpServletRequest req) {
         return jwtService.extractTenantId(req.getHeader("Authorization").substring(7));
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> supprimer(
+            @PathVariable UUID id, HttpServletRequest request) {
+        alimentationService.supprimerFormule(id, tenantId(request));
+        return ResponseEntity.noContent().build();
+    }
 }
