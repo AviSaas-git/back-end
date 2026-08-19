@@ -83,7 +83,8 @@ public class SecurityConfig {
         // Origines autorisées — Next.js en dev et en prod
         config.setAllowedOrigins(List.of(
                 "http://localhost:3000",
-                "http://localhost:3001"
+                "http://localhost:3001",
+                "https://front-production-81ed.up.railway.app" // <-- AJOUTEZ CETTE LIGNE ICI
         ));
         config.setAllowedMethods(List.of(
                 "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"
@@ -98,7 +99,6 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", config);
         return source;
     }
-
     // ── Provider — utilise notre UserDetailsService + BCrypt ────────
     @Bean
     public AuthenticationProvider authenticationProvider() {
